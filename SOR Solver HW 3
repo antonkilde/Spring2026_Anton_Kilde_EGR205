@@ -1,0 +1,65 @@
+import numpy as np
+# Uses SOR method for solving linear systems Ax=b
+
+def sor(A, b, omega, tolerance, max_iterations):
+    n = len(b) # counts how many numbers in vector b, or how many unknowns
+    x = np.zeros(n) # is our initial guess, a vector with all zeros
+
+    for k in range(max_iterations):
+        x_old = x.copy()
+        for i in range(n):
+            sum_ax = 0
+            for j in range(n):
+                if j != i:
+                    sum_ax += A[i,j] * x[j]
+            x_gs = (b[i] - sum_ax) / A[i,i]
+            x[i] = x_old[i] + omega * (x_gs - x_old[i])
+        error = np.linalg.norm(x - x_old, ord=np.inf) # looks at largest update in our vector
+
+        if error < tolerance:
+            print('Converged after', k+1, 'iterations')
+            return x
+    print ("Did not converge")
+    return x
+
+A = np.array([
+    [-4.,1.,0.,1.,0.,0.,0.,0.,0.],
+    [1.,-4.,1.,0.,1.,0.,0.,0.,0.],
+    [0.,1.,-4.,0.,0.,1.,0.,0.,0.],
+    [1.,0.,0.,-4.,1.,0.,1.,0.,0.],
+    [0.,1.,0.,1.,-4.,1.,0.,1.,0.],
+    [0.,0.,1.,0.,1.,-4.,0.,0.,1.],
+    [0.,0.,0.,1.,0.,0.,-4.,1.,0.],
+    [0.,0.,0.,0.,1.,0.,1.,-4.,1.],
+    [0.,0.,0.,0.,0.,1.,0.,1.,-4.],
+    ])
+b = np.array([0.,0.,100.,0.,0.,100.,200.,200.,300.])
+
+#For large matrices
+#n = 9
+#A = np.zeros((n, n))
+
+# Main diagonal 
+#for i in range(n):
+    #A[i, i] = 4
+
+# Upper and lower diagonals 
+#for i in range(n-1):
+    #A[i, i+1] = -1
+    #A[i+1, i] = -1
+
+# Corner entries
+#A[0, n-1] = 1
+#A[n-1, 0] = 1
+
+# Right-hand side vector
+#b = np.zeros(n)
+#b[n-1] = 100
+
+omega = 1.0
+tolerance = 1e-8
+max_iterations = 1000
+solution = sor(A, b, omega, tolerance, max_iterations)
+residual = np.linalg.norm(A @ solution - b)
+print("Residual (Euclidean norm):", residual)
+print(solution)
