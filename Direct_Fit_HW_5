@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+input = np.array([1000, 1100, 1200])
+output = np.array([1.1410, 1.1573, 1.1722])
+
+# vandermonde, uses input values to give n columns, with power increasing 
+matrix = np.vander(input, N=3, increasing=True)
+coe = np.linalg.solve(matrix, output)
+
+x_target = 1120
+# "::-1" flips the order of our coefficients in order to give to polyval
+int = np.polyval(coe[::-1], x_target)
+
+print(f"Linear System Matrix:\n{matrix}")
+print(f"Solved Coefficients: {coe}")
+# holds interpolation to 4 decimal points
+print(f"Result of interpolation: {int:.4f}")
+
+# == Plot ==
+x_fit = np.linspace(1000, 1200, 100)
+y_fit = np.polyval(coe[::-1], x_fit)
+
+plt.figure(figsize=(8, 5))
+plt.plot(input, output, 'bd', label='Original Data')
+plt.plot(x_fit, y_fit, 'r-', label='Fitted Polynomial')
+plt.title('Problem 2')
+plt.xlabel('Temperature T (K)')
+plt.ylabel('Cp (kJ/kg-K)')
+plt.grid(True, linestyle='--')
+plt.legend()
+plt.show()
