@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+input = np.array([1000, 1100, 1200, 1300, 1400, 1500, 1600])
+output = np.array([1.1410, 1.1573, 1.1722, 1.1858, 1.1982, 1.2095, 1.2197])
+
+coe = np.polyfit(input, output, 4)
+
+print("4th Degree Coefficients:")
+print(coe)
+
+# == Plot ==
+T_fit = np.linspace(1000, 1600, 100)
+y_line = np.polyval(coe, T_fit)
+y_quad = np.polyval(coe, T_fit)
+
+plt.figure(figsize=(8, 5))
+plt.plot(input, output, 'ks', label='Original Data') 
+#plt.plot(T_fit, y_line, 'r--', label='Best Straight Line') 
+plt.plot(T_fit, y_quad, 'b-', label='Best Quadratic')
+plt.title('Problem 6')
+plt.xlabel('Temperature T (K)')
+plt.ylabel('Cp (kJ/kg-K)')
+#plt.legend()
+plt.grid(True, linestyle=':')
+plt.show()
