@@ -1,0 +1,31 @@
+import numpy as np
+
+x_data = np.array([54.80, 54.06, 53.34])
+f_data = np.array([65.59, 64.59, 63.62])
+alpha = np.radians(x_data)
+beta = np.radians(f_data)
+h = 1
+a = 100
+
+# Problem 2 position formulas
+tan_alpha = np.tan(alpha)
+tan_beta = np.tan(beta)
+x = a * tan_beta / (tan_beta - tan_alpha)
+y = a * tan_alpha * tan_beta / (tan_beta - tan_alpha)
+
+# Central Difference
+x_prime = (x[2] - x[0]) / (2 * h)
+y_prime = (y[2] - y[0]) / (2 * h)
+
+# We have x and y velocites, now find total velocity and angle
+speed = np.sqrt(x_prime**2 + y_prime**2)
+gamma_deg = np.degrees(np.arctan(y_prime / x_prime))
+
+#f_double_prime = (f_data[2] - 2*f_data[1] + f_data[0]) / (h**2)
+
+print(f"At t=10s:")
+print(f"Coordinates: x = {x[1]:.2f}m, y = {y[1]:.2f}m")
+print(f"Total Velocity v = {speed:.2f} m/s")
+print(f"Climb Angle gamma = {gamma_deg:.2f} degrees")
+#print(f"Estimated first derivative: {f_prime:.2f}")
+#print(f"Estimated second derivative: {f_double_prime:.2f}")
