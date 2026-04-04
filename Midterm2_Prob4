@@ -1,0 +1,34 @@
+import numpy as np
+
+# Data
+strain = np.linspace(0, 0.50, 11)
+stress = np.array([0, 0.252, 0.531, 0.840, 1.184, 1.558, 1.975, 2.444, 2.943, 3.500, 4.115])
+
+derivs = []
+
+for i in range(len(strain)):
+    if i == 0:
+        index = [0, 1, 2]
+    elif i == len(strain) - 1:
+        index = [-3, -2, -1]
+    else:
+        index = [i-1, i, i+1]
+    
+    # least squares vandermonde 
+    local_input = strain[index]
+    local_output = stress[index]
+    matrix = np.vander(local_input, N=3, increasing=True)
+    coe = np.linalg.solve(matrix, local_output)
+    a1 = coe[1]
+    a2 = coe[2]
+    d_val = a1 + 2 * a2 * strain[i]
+    
+    derivs.append(d_val)
+
+derivs = np.array(derivs)
+
+# least squares
+final = np.polyfit(stress, derivs, 1)
+
+print(f"a = {final[1]:.4f}")
+print(f"b = {final[0]:.4f}")

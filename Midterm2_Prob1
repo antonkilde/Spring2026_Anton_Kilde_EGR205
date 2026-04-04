@@ -1,0 +1,35 @@
+import numpy as np
+
+u = 2510
+M0 = 2.8e6
+m_dot = 1.33e4
+g = 9.81
+
+v_target = 335
+x0 = 10
+
+def f(t):
+    # set function to zero
+    return u * np.log(M0 / (M0 - m_dot * t)) - g * t - v_target
+
+def df(t):
+    return (u * m_dot) / (M0 - m_dot * t) - g
+
+def newton(f, df, x0, tol=1e-6, max_iter=100):
+
+    x = x0
+
+    for i in range(max_iter):
+        x_new = x - f(x)/df(x)
+        if i < 2:   # #prints first two iterations
+            print(f"Iteration {i+1}: x = {x_new}")
+        if abs(x_new - x) < tol:
+          # #stops when value is close enough
+            return x_new, i+1
+        x = x_new
+    return x, max_iter
+
+root, iterations = newton(f, df, x0)
+
+print(f"Total iterations: {iterations}")
+print(f"Final solution: {root:.6f} seconds")
