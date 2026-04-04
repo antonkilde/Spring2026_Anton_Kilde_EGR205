@@ -11,6 +11,8 @@ def trapezoidal_rule(x, f, n):
     # determines how many points to use, or rather how many subintervals
     range = np.linspace(0, len(x) - 1, n + 1).astype(int)
     selected_f = f[range]
+    print(selected_f)
+    
     
     # trapezodial rule formulaa
     result = (h / 2) * (selected_f[0] + 2 * np.sum(selected_f[1:-1]) + selected_f[-1])
