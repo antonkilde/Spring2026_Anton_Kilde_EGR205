@@ -1,0 +1,37 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# parameters
+C_0 = 0.0
+Ce_0 = 0.1
+alpha = 0.5
+tau = 0.0001
+t_end = 0.01
+h = 0.00005 
+steps = int(t_end / h)
+
+# function
+def f(t, C):
+    Ce = Ce_0 + alpha * (t**2)
+    return (Ce - C) / tau
+
+# creates arrays
+t = np.linspace(0, t_end, steps + 1)
+C = np.zeros(steps + 1)
+C[0] = C_0
+
+# loop
+for i in range(steps):
+    # predictor
+    C_predict = C[i] + h * f(t[i], C[i])
+    # corrector
+    C[i+1] = C[i] + (h/2) * (f(t[i], C[i]) + f(t[i+1], C_predict))
+
+# plot
+plt.plot(t, C, label='Mass Fraction C(t)')
+plt.xlabel('Time (s)')
+plt.ylabel('Mass Fraction')
+plt.title('Problem 3: Predictor-Corrector Method')
+plt.grid(True)
+plt.legend()
+plt.show()
