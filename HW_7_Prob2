@@ -1,0 +1,44 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# constants
+N0 = 100000
+dt = 1.0
+t_end = 20
+
+# population equation
+def dNdt(t, N):
+    return 0.1 * N - (8e-7) * (N**2)
+
+# RK4
+def solve_rk4_pop(dt, t_end):
+    t_vals = np.arange(0, t_end + dt, dt)
+    N_vals = np.zeros(len(t_vals))
+    N_vals[0] = N0
+
+    for i in range(len(t_vals) - 1):
+        k1 = dNdt(t_vals[i], N_vals[i])
+        k2 = dNdt(t_vals[i] + dt/2, N_vals[i] + dt/2 * k1)
+        k3 = dNdt(t_vals[i] + dt/2, N_vals[i] + dt/2 * k2)
+        k4 = dNdt(t_vals[i] + dt, N_vals[i] + dt * k3)
+        N_vals[i+1] = N_vals[i] + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
+    return t_vals, N_vals
+
+# calls function
+t_pop, N_pop = solve_rk4_pop(dt, t_end)
+
+print(f"{'Year':<10} | {'Population':<15}")
+print("-" * 28)
+for i in range(len(t_pop)):
+    print(f"{t_pop[i]:<10.1f} | {N_pop[i]:<15.2f}")
+
+# plot
+plt.figure(figsize=(10, 6))
+plt.plot(t_pop, N_pop, 'g-o', label='Population (RK4)')
+plt.xlabel('Years')
+plt.ylabel('Number of People (N)')
+plt.title('Problem 2: Population Growth Over 20 Years')
+plt.legend()
+plt.grid(True)
+plt.show()
