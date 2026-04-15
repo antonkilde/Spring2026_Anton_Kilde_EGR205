@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import fsolve # uses guess and check to find value of T
+
+# constants
+r = 0.01          # radius (m)
+rho = 8000        # density (kg/m^3)
+C_heat = 500      # specific heat (J/kg-K)
+sigma = 0.3       # emissivity
+epsilon = 5.67e-8 # Stefan-Boltzmann constant (J/m^2-K^4-s)
+Ta = 100.0        # Ambient Temp (K)
+T0 = 2500.0       # Initial Temp (K)
+
+# calculated constants
+A = 4 * np.pi * r**2
+m = rho * (4/3) * np.pi * r**3
+alpha = (A * sigma * epsilon) / (m * C_heat)
+
+# RK4
+def f(t, T):
+    return -alpha * (T**4 - Ta**4)
+
+def solve_rk4(dt, t_end=10):
+    t_vals = np.arange(0, t_end + dt, dt)
+    T_vals = np.zeros(len(t_vals))
+    T_vals[0] = T0
+    for i in range(len(t_vals) - 1):
+        k1 = f(t_vals[i], T_vals[i])
+        k2 = f(t_vals[i] + dt/2, T_vals[i] + dt/2 * k1)
+        k3 = f(t_vals[i] + dt/2, T_vals[i] + dt/2 * k2)
+        k4 = f(t_vals[i] + dt, T_vals[i] + dt * k3)
+        T_vals[i+1] = T_vals[i] + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+    return t_vals, T_vals
+
+# exact solution, root finding
+def exact_eqn(T, t):
+    # this returns the 'left side' minus the 'right side'
+    # if T is correct, this result will be 0
+    term1 = np.arctan(T/Ta) - np.arctan(T0/Ta)
+    term2 = 0.5 * np.log(((T0 - Ta) * (T + Ta)) / ((T - Ta) * (T0 + Ta)))
+    rhs = 2 * alpha * (Ta**3) * t
+    return term1 + term2 - rhs
+
+t_exact = np.arange(0, 11, 1)
+T_exact = [fsolve(exact_eqn, 2000, args=(t))[0] for t in t_exact]
+
+# calls RK4 function with our two different steps
+t1, T1 = solve_rk4(dt=1.0)
+t2, T2 = solve_rk4(dt=0.5)
+
+# table
+print(f"{'Time (s)':<10} | {'Exact T (K)':<15} | {'RK4 (dt=1.0)':<15} | {'RK4 (dt=0.5)':<15}")
+print("-" * 60)
+
+for i in range(11):
+    t_curr = i
+    exact_val = T_exact[i]
+    rk4_1 = T1[i]
+    rk4_05 = T2[2*i]
+    print(f"{t_curr:<10.1f} | {float(exact_val):<15.4f} | {rk4_1:<15.4f} | {rk4_05:<15.4f}")
+
+# error calculation
+err1 = abs(T1[-1] - T_exact[-1])
+err2 = abs(T2[-1] - T_exact[-1])
+print("")
+print("Accuracy Verification at t=10s:")
+print(f"Error (dt=1.0): {float(err1):.4e}")
+print(f"Error (dt=0.5): {float(err2):.4e}")
+print(f"Error Ratio (E1/E2): {float(err1/err2):.2f}")
+
+# plot
+plt.figure(figsize=(10, 6))
+plt.plot(t_exact, T_exact, 'ko', label='Exact Solution')
+plt.plot(t1, T1, 'r-', label='RK4 (dt=1.0)')
+plt.plot(t2, T2, 'b--', label='RK4 (dt=0.5)')
+plt.xlabel('Time (s)')
+plt.ylabel('Temperature (K)')
+plt.title('Problem 1: Heat Radiation Cooling')
+plt.legend()
+plt.grid(True)
+plt.show()
