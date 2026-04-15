@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fsolve # uses guess and check to find value of T
 
 # constants
-r = 0.01          # radius (m)
-rho = 8000        # density (kg/m^3)
-C_heat = 500      # specific heat (J/kg-K)
-sigma = 0.3       # emissivity
-epsilon = 5.67e-8 # Stefan-Boltzmann constant (J/m^2-K^4-s)
-Ta = 100.0        # Ambient Temp (K)
-T0 = 2500.0       # Initial Temp (K)
+r = 0.01
+rho = 8000
+C_heat = 500
+sigma = 0.3
+epsilon = 5.67e-8
+Ta = 100.0
+T0 = 2500.0
 
 # calculated constants
 A = 4 * np.pi * r**2
