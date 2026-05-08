@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# constants
+A1, A2 = 0.1, 0.1
+B1, B2 = 8e-7, 8e-7
+C1, C2 = 1e-6, 1e-7
+N1_0, N2_0 = 100000, 100000
+dt = 0.1  
+t_end = 10.0
+
+# equations
+def dNdt_system(t, N):
+    N1, N2 = N
+    f1 = N1 * (A1 - B1 * N1 - C1 * N2)
+    f2 = N2 * (A2 - B2 * N2 - C2 * N1)
+    return np.array([f1, f2])
+
+# RK4 
+def rk4(dt, t_end):
+    t_vals = np.arange(0, t_end + dt, dt)
+    N_vals = np.zeros((len(t_vals), 2))
+    N_vals[0] = [N1_0, N2_0]
+
+    for i in range(len(t_vals) - 1):
+        t = t_vals[i]
+        N = N_vals[i]
+        
+        k1 = dNdt_system(t, N)
+        k2 = dNdt_system(t + dt/2, N + dt/2 * k1)
+        k3 = dNdt_system(t + dt/2, N + dt/2 * k2)
+        k4 = dNdt_system(t + dt, N + dt * k3)
+        
+        N_vals[i+1] = N + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
+    return t_vals, N_vals
+
+# calls function
+t_pop, N_pop = rk4(dt, t_end)
+
+# prints results
+print(f"{'Year':<10} | {'Species 1 (N1)':<15} | {'Species 2 (N2)':<15}")
+print("-" * 45)
+for i in range(0, len(t_pop), 10): 
+    print(f"{t_pop[i]:<10.1f} | {N_pop[i,0]:<15.2f} | {N_pop[i,1]:<15.2f}")
+
+# plots results
+plt.figure(figsize=(10, 6))
+plt.plot(t_pop, N_pop[:, 0], 'b-', label='Species 1 (N1)')
+plt.plot(t_pop, N_pop[:, 1], 'r-', label='Species 2 (N2)')
+plt.xlabel('Years')
+plt.ylabel('Population')
+plt.title('Problem 1: Species Competition Over 10 Years')
+plt.legend()
+plt.grid(True)
+plt.show()
