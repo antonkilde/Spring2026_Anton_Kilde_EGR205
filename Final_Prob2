@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# constants
+g = 9.81
+m = 90
+cd = 0.225
+dt = 0.1
+t_end = 50 # intital guess
+
+# equation
+def dvdt(t, v):
+    return g - (cd / m) * (v**2)
+
+# RK4
+def rk4(dt, t_end):
+    t_vals = np.arange(0, t_end + dt, dt)
+    v_vals = np.zeros(len(t_vals))
+    v_vals[0] = 0 # inital velo
+
+    for i in range(len(t_vals) - 1):
+        k1 = dvdt(t_vals[i], v_vals[i])
+        k2 = dvdt(t_vals[i] + dt/2, v_vals[i] + dt/2 * k1)
+        k3 = dvdt(t_vals[i] + dt/2, v_vals[i] + dt/2 * k2)
+        k4 = dvdt(t_vals[i] + dt, v_vals[i] + dt * k3)
+        v_vals[i+1] = v_vals[i] + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
+    return t_vals, v_vals
+
+def get_distance(t, v): # distance = integral of velo
+    h = t[1] - t[0]
+    y_vals = np.zeros(len(v))
+    for i in range(1, len(v)):
+        step_area = (h / 2) * (v[i-1] + v[i])
+        y_vals[i] = y_vals[i-1] + step_area
+    return y_vals
+
+
+t_data, v_data = rk4(dt, t_end)
+y_data = get_distance(t_data, v_data)
+
+hit_idx = np.where(y_data >= 1000)[0][0]
+time_to_impact = t_data[hit_idx]
+
+print(f"The object hits the ground at approx: {time_to_impact:.2f} seconds")
+
+# plot
+plt.figure(figsize=(10, 6))
+plt.plot(y_data[:hit_idx+1], v_data[:hit_idx+1], 'b-', label='Velocity vs Distance')
+plt.axvline(x=1000, color='r', linestyle='--', label='Ground (1000m)')
+plt.xlabel('Distance Fallen (m)')
+plt.ylabel('Velocity (m/s)')
+plt.title('Problem 2')
+plt.legend()
+plt.grid(True)
+plt.show()
