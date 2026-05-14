@@ -1,0 +1,40 @@
+import numpy as np
+
+#parameters
+a = 5.0
+r_min = a / 2.0
+r_max = a
+dr = 0.5             
+
+# Calculate nodes
+radii = np.arange(r_min, r_max + dr/2, dr)
+num_nodes = len(radii)
+
+A = np.zeros((num_nodes, num_nodes))
+B = np.zeros(num_nodes)
+
+# left boundary
+A[0, 0] = 1.0
+B[0] = 0.0
+
+# internal nodes finite difference
+for i in range(1, num_nodes - 1):
+    r_i = radii[i]
+    A[i, i-1] = 1.0 - dr / (2.0 * r_i)
+    A[i, i]   = -2.0
+    A[i, i+1] = 1.0 + dr / (2.0 * r_i)
+    B[i]      = 0.0
+
+# right boundary
+A[-1, -1] = 1.0
+B[-1] = 200.0
+
+# solve system
+T_numerical = np.linalg.solve(A, B)
+
+print("Radius (cm) | Numerical Temp (C) | Analytical Temp (C)")
+print("-" * 55)
+for i in range(num_nodes):
+    r = radii[i]
+    T_exact = 200.0 * (1.0 - np.log(r / a) / np.log(0.5))
+    print(f"r = {r:4.2f}: T_num = {T_numerical[i]:6.2f}, T_exact = {T_exact:6.2f}")
