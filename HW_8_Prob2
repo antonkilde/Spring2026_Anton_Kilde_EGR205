@@ -1,0 +1,48 @@
+import numpy as np
+
+# conditions
+y_exact = 0.263622
+dx_list = [0.25, 0.125, 0.0625]
+errors = []
+
+for dx in dx_list:
+    N = int(round(1.0 / dx))
+    num_nodes = N + 1
+    
+    A = np.zeros((num_nodes, num_nodes))
+    B = np.ones(num_nodes)
+    
+    # left boundary condition
+    A[0, 0] = 1.0
+    B[0] = 1.0
+    
+    # internal nodes finite difference
+    for i in range(1, N):
+        A[i, i-1] = (1.0 / dx**2) - (5.0 / (2.0 * dx))
+        A[i, i]   = 4.0 - (2.0 / dx**2)
+        A[i, i+1] = (1.0 / dx**2) + (5.0 / (2.0 * dx))
+        
+   
+    A[N, N-1] = (2.0 / dx**2) 
+    A[N, N]   = 4.0 - (2.0 / dx**2)
+    B[N] = 1.0
+
+    # solve the system of linear equations
+    y = np.linalg.solve(A, B)
+    
+    # find node index matching x = 0.5
+    idx_05 = int(round(0.5 / dx))
+    y_05 = y[idx_05]
+    
+    error = abs(y_05 - y_exact)
+    errors.append(error)
+    
+    print(f"dx = {dx}: y(0.5) = {y_05:.6f}, Error = {error:.3e}")
+
+# Calculate convergence ratios
+ratio1 = errors[0] / errors[1]
+ratio2 = errors[1] / errors[2]
+
+print()
+print(f"Ratio 1 (0.25 / 0.125) = {ratio1:.2f}")
+print(f"Ratio 2 (0.125 / 0.0625) = {ratio2:.2f}")
