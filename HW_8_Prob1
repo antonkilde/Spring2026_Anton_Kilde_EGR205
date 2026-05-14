@@ -1,0 +1,67 @@
+import numpy as np
+
+# define system
+def f(x, y1, y2):
+    return y2, 1 - 5 * y2 - 4 * y1
+
+# RK4 
+def rk4(dx, g):
+    x = 0.0
+    y1 = 0.0  # y(0) = 0
+    y2 = g    # y'(0) = g
+    
+    y_at_05 = 0.0
+    steps = int(round(1.0 / dx))
+    
+    for _ in range(steps):
+        # Slope 1
+        k1_y1, k1_y2 = f(x, y1, y2)
+        
+        # Slope 2
+        k2_y1, k2_y2 = f(x + dx/2, y1 + (dx/2)*k1_y1, y2 + (dx/2)*k1_y2)
+        
+        # Slope 3
+        k3_y1, k3_y2 = f(x + dx/2, y1 + (dx/2)*k2_y1, y2 + (dx/2)*k2_y2)
+        
+        # Slope 4
+        k4_y1, k4_y2 = f(x + dx, y1 + dx*k3_y1, y2 + dx*k3_y2)
+        
+        # Update values
+        y1 += (dx / 6) * (k1_y1 + 2*k2_y1 + 2*k3_y1 + k4_y1)
+        y2 += (dx / 6) * (k1_y2 + 2*k2_y2 + 2*k3_y2 + k4_y2)
+        x += dx
+        
+        # Catch y when x reaches 0.5
+        if abs(x - 0.5) < 1e-5:
+            y_at_05 = y1
+            
+    return y1, y_at_05
+
+# Solve for each step size
+dx_list = [0.25, 0.125, 0.0625]
+y_exact = 1.233303
+errors = []
+
+for dx in dx_list:
+    # Get y(1) for two test guesses to use linear shooting
+    y1_g1, _ = rk4(dx, 0.0)
+    y1_g2, _ = rk4(dx, 1.0)
+    
+    # Calculate exact initial slope needed to hit y(1) = 1
+    g_true = 0.0 + (1.0 - y1_g1) * (1.0 - 0.0) / (y1_g2 - y1_g1)
+    
+    # Run with correct slope to get y(0.5)
+    _, y_05 = rk4(dx, g_true)
+    
+    error = abs(y_05 - y_exact)
+    errors.append(error)
+    
+    print(f"dx = {dx}: y(0.5) = {y_05:.6f}, Error = {error:.3e}")
+
+# Calculate and print the verification error ratios
+ratio1 = errors[0] / errors[1]
+ratio2 = errors[1] / errors[2]
+
+print()
+print(f"Ratio 1 (0.25 / 0.125) = {ratio1:.2f}")
+print(f"Ratio 2 (0.125 / 0.0625) = {ratio2:.2f}")
